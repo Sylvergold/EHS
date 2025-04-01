@@ -110,36 +110,55 @@ export const fetchAllBPForPatient = async (req, res) => {
     });
 
     if (!patient) {
-      return res
-        .status(404)
-        .json({ message: "Patient not found or is not a valid patient" });
+      return res.status(404).json({
+        message: "Patient not found or is not a valid patient",
+      });
     }
 
-    // Fetch all BP readings for the patient
+    // Fetch all BP readings for the patient, ordered by most recent first
     const bpReadings = await BPReading.findAll({
       where: { patientId },
       order: [["createdAt", "DESC"]],
-      attributes: ["id", "systolic", "diastolic", "measurementLocation", "measuredBy", "patientId", "createdAt", "updatedAt"],
+      attributes: [
+        "id",
+        "systolic",
+        "diastolic",
+        "heartRate",
+        "measurementLocation",
+        "measuredBy",
+        "patientId",
+        "createdAt",
+        "updatedAt",
+      ],
     });
 
     if (!bpReadings.length) {
-      return res
-        .status(404)
-        .json({ message: "No BP readings found for this patient" });
+      return res.status(404).json({
+        message: "No BP readings found for this patient",
+      });
     }
 
     // Calculate averages
     const totalReadings = bpReadings.length;
-    const totalSystolic = bpReadings.reduce((sum, reading) => sum + reading.systolic, 0);
-    const totalDiastolic = bpReadings.reduce((sum, reading) => sum + reading.diastolic, 0);
+    const totalSystolic = bpReadings.reduce(
+      (sum, reading) => sum + reading.systolic,
+      0
+    );
+    const totalDiastolic = bpReadings.reduce(
+      (sum, reading) => sum + reading.diastolic,
+      0
+    );
 
     const averageSystolic = (totalSystolic / totalReadings).toFixed(2);
     const averageDiastolic = (totalDiastolic / totalReadings).toFixed(2);
 
-    // Get the last BP reading values
-    const lastBPReading = bpReadings[0]; // First item in the sorted array
-    const lastSystolic = lastBPReading.systolic;
-    const lastDiastolic = lastBPReading.diastolic;
+    // Get the most recent BP reading
+    const lastReading = bpReadings.length - 1; // First item since we already sorted it by `createdAt`
+    const lastSystolic = lastReading?.systolic || "No data available";
+    const lastDiastolic = lastReading?.diastolic || "No data available";
+
+    console.log("Most Recent Systolic:", lastSystolic);
+    console.log("Most Recent Diastolic:", lastDiastolic);
 
     return res.status(200).json({
       message: "BP readings retrieved successfully",
@@ -149,10 +168,12 @@ export const fetchAllBPForPatient = async (req, res) => {
       lastDiastolic,
       data: bpReadings,
     });
-
   } catch (error) {
     console.error("Error fetching BP readings:", error);
-    return res.status(500).json({ message: "Unable to fetch BP readings", error: error.message });
+    return res.status(500).json({
+      message: "Unable to fetch BP readings",
+      error: error.message,
+    });
   }
 };
 

@@ -1,21 +1,21 @@
-import Consultation from '../../models/users/consultation.js';
-import User from '../../models/users/User.js';
+import Consultation from "../../models/users/consultation.js";
+import User from "../../models/users/User.js";
 
 export const addConsultation = async (req, res) => {
   try {
     //validation required for body
     const data = req.body;
     if (!data) {
-      return res.status(400).json({ message: 'Provide a consultation note' });
+      return res.status(400).json({ message: "Provide a consultation note" });
     }
     const newConsult = await Consultation.create(data);
     return res.status(200).json({
-      message: 'Consultation note added successfully',
+      message: "Consultation note added successfully",
       data: newConsult,
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: 'Unable to add consultation note' });
+    return res.status(500).json({ message: "Unable to add consultation note" });
   }
 };
 
@@ -39,30 +39,36 @@ export const updateConsultation = async (req, res) => {
     });
   } catch (error) {
     console.error("Update error:", error);
-    return res.status(500).json({ message: "Unable to update consultation record" });
+    return res
+      .status(500)
+      .json({ message: "Unable to update consultation record" });
   }
 };
-
 
 export const fetchConHx = async (req, res) => {
   try {
     //validation needed
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: 'Provide a consultation ID' });
+      return res.status(400).json({ message: "Provide a consultation ID" });
     }
-    const findConHx = await Consultation.findOne({ where: {id: id} });
+    const findConHx = await Consultation.findOne({ where: { id: id } });
     if (!findConHx)
-      return res.status(404).json({ message: 'Consultation history not found' });
+      return res
+        .status(404)
+        .json({ message: "Consultation history not found" });
     return res.status(200).json({
-      message: 'Consultation History  found',
+      message: "Consultation History  found",
       data: findConHx,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Unable to Find Consultation History' });
+    return res
+      .status(500)
+      .json({ message: "Unable to Find Consultation History" });
   }
 };
+
 //return all consultation history records
 export const fetchAllConHx = async (req, res) => {
   try {
@@ -72,7 +78,17 @@ export const fetchAllConHx = async (req, res) => {
         {
           model: User,
           as: "patient", // Use an alias for clarity
-          attributes: ["id", "firstName", "lastName", "email", "phone", "gender", "age", "address"], // Fetch only relevant fields
+          attributes: [
+            "id",
+            "firstName",
+            "lastName",
+            "email",
+            "cardNumber",
+            "phone",
+            "gender",
+            "dateOfBirth",
+            "address",
+          ], // Fetch only relevant fields
         },
       ],
     });
@@ -81,14 +97,21 @@ export const fetchAllConHx = async (req, res) => {
       return res.status(404).json({ message: "No consultation history found" });
     }
 
+    const totalConsultaions = findAllMedHx.length;
+
     return res.status(200).json({
       message: "Consultation history retrieved successfully",
+      totalConsultaions: totalConsultaions,
       data: findAllMedHx,
     });
-
   } catch (error) {
     console.error("Error fetching consultation history:", error);
-    return res.status(500).json({ message: "Unable to fetch consultation history", error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "Unable to fetch consultation history",
+        error: error.message,
+      });
   }
 };
 
@@ -107,7 +130,9 @@ export const fetchPatientConsultations = async (req, res) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found or not a valid patient" });
+      return res
+        .status(404)
+        .json({ message: "Patient not found or not a valid patient" });
     }
 
     // ✅ Fetch all consultations for this patient
@@ -117,7 +142,17 @@ export const fetchPatientConsultations = async (req, res) => {
         {
           model: User,
           as: "healthWorker",
-          attributes: ["id", "firstName", "lastName", "email", "phone"], // Fetch only necessary fields
+          attributes: [
+            "id",
+            "firstName",
+            "lastName",
+            "email",
+            "cardNumber",
+            "phone",
+            "gender",
+            "dateOfBirth",
+            "address"
+          ], // Fetch only necessary fields
         },
       ],
       order: [["createdAt", "DESC"]], // Sort from newest to oldest
@@ -135,4 +170,3 @@ export const fetchPatientConsultations = async (req, res) => {
     });
   }
 };
-

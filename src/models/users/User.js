@@ -4,6 +4,7 @@ import BPReading from "./BPReading.js";
 import Medication from "./medicationHx.js";
 import Consultation from "./consultation.js";
 import healthWorkerProfile from "./HealthWorkerProfile.js";
+import { CardNumbers } from "./cardNumbers.js";
 
 const User = sequelize.define(
     "User",
@@ -23,13 +24,13 @@ const User = sequelize.define(
         },
         email: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             unique: true,
             validate: { isEmail: true },
         },
         password: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         role: {
             type: DataTypes.ENUM("patient", "health_worker", "admin"),
@@ -45,12 +46,19 @@ const User = sequelize.define(
         },
         phone: { type: DataTypes.STRING },
         address: { type: DataTypes.STRING },
+
+        cardNumber: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+            unique: true, 
+        },
     },
     {
         tableName: "users",
         timestamps: true,
     }
 );
+
 
 // Define relationships with proper aliasing
 
@@ -73,5 +81,9 @@ Medication.belongsTo(User, { foreignKey: "patientId", as: "patient" });
 // Add a one-to-one relationship (Each health worker has one professional profile)
 User.hasOne(healthWorkerProfile, { foreignKey: "userId", as: "profile", onDelete: "CASCADE" });
 healthWorkerProfile.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+User.hasMany(CardNumbers, { foreignKey: "assignedTo", as: "assignedCards" });
+CardNumbers.belongsTo(User, { foreignKey: "assignedTo", as: "user" });
+
 
 export default User;
