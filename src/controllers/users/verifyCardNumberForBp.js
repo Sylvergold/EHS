@@ -1,5 +1,6 @@
 import User from "../../models/users/User.js";
 
+// Verifying card number for BP
 export const verifyCardNumberForBP = async (req, res) => {
   try {
     const { cardNumber } = req.body;
