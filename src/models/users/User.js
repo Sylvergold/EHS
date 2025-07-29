@@ -3,7 +3,7 @@ import { sequelize } from "../../config/db.js";
 import BPReading from "./BPReading.js";
 import Medication from "./medicationHx.js";
 import Consultation from "./consultation.js";
-import healthWorkerProfile from "./HealthWorkerProfile.js";
+import healthWorkerProfile from "./healthWorkerProfile.js";
 import { CardNumbers } from "./cardNumbers.js";
 
 const User = sequelize.define(
